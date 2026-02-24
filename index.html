@@ -218,6 +218,9 @@ h1,h2,h3,.num{font-family:'Barlow Condensed',sans-serif}
 <!-- AUTH -->
 <div id="auth-screen">
   <div class="auth-box">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+      <button class="lang-btn" id="auth-lang-btn" onclick="toggleLang()" style="font-size:14px;padding:6px 14px">🇸🇦 AR</button>
+    </div>
     <div class="auth-logo">FITTRACK</div>
     <div class="auth-sub" id="auth-sub">برنامج تدريب بناء العضلات — PPL x2</div>
     <div class="auth-tabs">
@@ -455,7 +458,7 @@ ar:{dir:'rtl',lang:'ar',
  'atab-login':'تسجيل الدخول','atab-reg':'إنشاء حساب',
  'l-user':'اسم المستخدم','l-pass':'كلمة المرور',
  'l-fname':'الاسم الكامل','l-user2':'اسم المستخدم','l-pass2':'كلمة المرور',
- 'btn-login':'دخول','btn-reg':'إنشاء الحساب','btn-logout':'خروج','lang-btn':'🇩🇪 DE',
+ 'btn-login':'دخول','btn-reg':'إنشاء الحساب','btn-logout':'خروج','lang-btn':'🇩🇪 DE','auth-lang-btn':'🇩🇪 DE',
  't-prog-title':'البرنامج','t-prog-desc':'6 أيام تدريب | Push / Pull / Legs × 2 | هدف: بناء الكتلة العضلية',
  't-log-title':'سجل التمارين','t-log-desc':'تتبع كل جلسة تدريبية',
  't-total-s':'جلسة إجمالية','t-week-s':'هذا الأسبوع','t-exs-s':'تمرين مسجل',
@@ -503,7 +506,7 @@ de:{dir:'ltr',lang:'de',
  'atab-login':'Anmelden','atab-reg':'Konto erstellen',
  'l-user':'Benutzername','l-pass':'Passwort',
  'l-fname':'Vollständiger Name','l-user2':'Benutzername','l-pass2':'Passwort',
- 'btn-login':'Einloggen','btn-reg':'Konto erstellen','btn-logout':'Abmelden','lang-btn':'🇸🇦 AR',
+ 'btn-login':'Einloggen','btn-reg':'Konto erstellen','btn-logout':'Abmelden','lang-btn':'🇸🇦 AR','auth-lang-btn':'🇸🇦 AR',
  't-prog-title':'Programm','t-prog-desc':'6 Trainingstage | Push / Pull / Legs × 2 | Ziel: Muskelaufbau',
  't-log-title':'Trainingsprotokoll','t-log-desc':'Verfolge jede Trainingseinheit',
  't-total-s':'Einheiten gesamt','t-week-s':'Diese Woche','t-exs-s':'Übungen gesamt',
@@ -547,11 +550,11 @@ de:{dir:'ltr',lang:'de',
  'badge-push':'Push','badge-pull':'Pull','badge-legs':'Legs','badge-rest':'Ruhe'
 }};
 
-let lang='ar';
+let lang='de';
 function T(k){return TR[lang][k]||TR.ar[k]||k;}
 
 const TR_IDS=['auth-sub','atab-login','atab-reg','l-user','l-pass','l-fname','l-user2','l-pass2',
- 'btn-login','btn-reg','btn-logout','lang-btn','t-prog-title','t-prog-desc','t-log-title','t-log-desc',
+ 'btn-login','btn-reg','btn-logout','lang-btn','auth-lang-btn','t-prog-title','t-prog-desc','t-log-title','t-log-desc',
  't-total-s','t-week-s','t-exs-s','t-nut-title','t-nut-desc','t-prot-today','t-cals-today',
  't-grams','t-grams2','t-goal','t-goal2','t-add-meal','t-meal-name','t-prot-g','t-carb-g','t-fat-g',
  't-cals-g','btn-add-meal','t-today-meals','t-met-title','t-met-desc','t-add-met',
@@ -1232,7 +1235,7 @@ function initBackHandler(){
 
 // ══════════ INIT ══════════
 window.addEventListener('DOMContentLoaded',()=>{
- lang=localStorage.getItem('ft_lang')||'ar';
+ lang=localStorage.getItem('ft_lang')||'de';
  applyLang();
  initBackHandler();
  const s=localStorage.getItem('ft_session');
