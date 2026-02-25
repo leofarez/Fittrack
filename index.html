@@ -201,12 +201,18 @@ h1,h2,h3,.num{font-family:'Barlow Condensed',sans-serif}
 .empty-state p{font-size:15px}
 .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--green);color:#000;padding:10px 20px;border-radius:30px;font-weight:700;font-size:14px;z-index:9999;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.unit-toggle{display:flex;background:var(--bg);border:1px solid var(--border);border-radius:30px;padding:3px;gap:2px;position:relative;cursor:pointer;user-select:none;flex-shrink:0}
-.ut-opt{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;color:var(--muted);transition:.25s;position:relative;z-index:1}
-.ut-opt.active{color:#000}
-.ut-slider{position:absolute;top:3px;right:3px;height:calc(100% - 6px);border-radius:20px;background:var(--accent);transition:.25s cubic-bezier(.4,0,.2,1);z-index:0}
+.unit-toggle{display:flex;background:var(--bg2);border:1px solid var(--border);border-radius:30px;padding:3px;gap:0;cursor:pointer;user-select:none;flex-shrink:0}
+.ut-opt{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;color:var(--muted);transition:.2s;min-width:44px;text-align:center}
+.ut-opt.active{background:var(--accent);color:#000}
 .wconv{font-size:12px;color:var(--accent3);background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;min-width:76px;font-weight:600;flex-shrink:0}
 .date-filter{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'Tajawal',sans-serif;font-size:13px;outline:none}
+
+.car-slide{flex:0 0 100%;min-width:100%;box-sizing:border-box;display:flex;align-items:center;justify-content:center;min-height:200px;position:relative}
+.car-slide img{width:100%;max-height:260px;object-fit:cover;display:block}
+.car-slide video{width:100%;max-height:260px;display:block}
+.car-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.3);transition:.2s;pointer-events:auto;cursor:pointer;border:none;padding:0}
+.car-dot.active{background:var(--accent);transform:scale(1.2)}
+#car-prev,#car-next{display:none}
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
@@ -232,13 +238,53 @@ h1,h2,h3,.num{font-family:'Barlow Condensed',sans-serif}
       <div class="form-group"><label id="l-pass">كلمة المرور</label><input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password"></div>
       <button class="btn-primary" id="btn-login" onclick="doLogin()">دخول</button>
       <div id="login-error" class="error-msg"></div>
+      <div style="text-align:center;margin-top:14px">
+        <button onclick="showForgot()" style="background:none;border:none;color:var(--muted);font-family:Tajawal,sans-serif;font-size:13px;cursor:pointer;text-decoration:underline" id="btn-forgot">نسيت كلمة المرور؟</button>
+      </div>
     </div>
     <div id="register-form" style="display:none">
       <div class="form-group"><label id="l-fname">الاسم الكامل</label><input type="text" id="reg-name" autocomplete="name"></div>
       <div class="form-group"><label id="l-user2">اسم المستخدم</label><input type="text" id="reg-user" autocomplete="username"></div>
       <div class="form-group"><label id="l-pass2">كلمة المرور</label><input type="password" id="reg-pass" placeholder="••••••••" autocomplete="new-password"></div>
+      <div class="form-group">
+        <label id="l-sq">سؤال الأمان</label>
+        <select id="reg-sq" style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:13px 16px;color:var(--text);font-family:Tajawal,sans-serif;font-size:14px;outline:none;appearance:none;cursor:pointer"></select>
+      </div>
+      <div class="form-group"><label id="l-sa">الإجابة</label><input type="text" id="reg-sa" autocomplete="off" id="l-sa-inp"></div>
       <button class="btn-primary" id="btn-reg" onclick="doRegister()">إنشاء الحساب</button>
       <div id="reg-error" class="error-msg"></div>
+    </div>
+    <!-- FORGOT PASSWORD PANEL -->
+    <div id="forgot-form" style="display:none">
+      <div style="text-align:center;margin-bottom:18px">
+        <div style="font-size:36px;margin-bottom:8px">🔐</div>
+        <div style="font-family:Barlow Condensed,sans-serif;font-size:22px;font-weight:700;color:var(--accent)" id="fp-title">استعادة كلمة المرور</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:4px" id="fp-sub">أدخل اسم المستخدم الخاص بك</div>
+      </div>
+      <!-- Step 1: username -->
+      <div id="fp-step1">
+        <div class="form-group"><label id="l-fp-user">اسم المستخدم</label><input type="text" id="fp-user" autocomplete="username"></div>
+        <button class="btn-primary" onclick="fpStep1()">متابعة →</button>
+        <div id="fp-error1" class="error-msg"></div>
+      </div>
+      <!-- Step 2: answer security question -->
+      <div id="fp-step2" style="display:none">
+        <div class="form-group">
+          <label id="l-fp-q" style="color:var(--accent);font-weight:600;font-size:14px">السؤال</label>
+          <div id="fp-question" style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:13px 16px;font-size:14px;color:var(--text);line-height:1.5"></div>
+        </div>
+        <div class="form-group"><label id="l-fp-ans">الإجابة</label><input type="text" id="fp-answer" autocomplete="off"></div>
+        <button class="btn-primary" onclick="fpStep2()">تحقق →</button>
+        <div id="fp-error2" class="error-msg"></div>
+      </div>
+      <!-- Step 3: new password -->
+      <div id="fp-step3" style="display:none">
+        <div class="form-group"><label id="l-fp-np">كلمة المرور الجديدة</label><input type="password" id="fp-newpass" placeholder="••••••••"></div>
+        <div class="form-group"><label id="l-fp-cp">تأكيد كلمة المرور</label><input type="password" id="fp-confpass" placeholder="••••••••"></div>
+        <button class="btn-primary" onclick="fpStep3()">حفظ كلمة المرور ✓</button>
+        <div id="fp-error3" class="error-msg"></div>
+      </div>
+      <button onclick="showLogin()" style="width:100%;margin-top:12px;background:none;border:1px solid var(--border);color:var(--muted);padding:10px;border-radius:10px;font-family:Tajawal,sans-serif;font-size:14px;cursor:pointer" id="fp-back-btn">← رجوع</button>
     </div>
   </div>
 </div>
@@ -395,10 +441,17 @@ h1,h2,h3,.num{font-family:'Barlow Condensed',sans-serif}
       <button class="modal-close" onclick="closeModalBtn()">✕</button>
     </div>
     <div class="modal-body">
-      <div class="media-area" id="media-area" onclick="triggerMedia()">
-        <div class="media-ph" id="media-ph"><div class="icon">📸</div><p id="t-add-media">اضغط لإضافة صورة أو فيديو توضيحي</p><span>JPG, PNG, MP4</span></div>
-        <div id="media-disp" style="display:none;width:100%"></div>
-        <button class="media-rm-btn" id="media-rm" style="display:none" onclick="removeMedia(event)">× حذف</button>
+      <!-- CAROUSEL -->
+      <div id="carousel-wrap" style="position:relative;border-radius:14px;overflow:hidden;background:#13131b;border:1px solid var(--border);margin-bottom:18px;user-select:none">
+        <div id="carousel-track" style="display:flex;transition:transform .3s ease;will-change:transform"></div>
+        <!-- dots -->
+        <div id="carousel-dots" style="position:absolute;bottom:8px;left:0;right:0;display:flex;justify-content:center;gap:6px;pointer-events:none"></div>
+        <!-- arrows -->
+        <button id="car-prev" onclick="carMove(-1)" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.55);border:none;color:#fff;width:30px;height:30px;border-radius:50%;font-size:16px;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:10">‹</button>
+        <button id="car-next" onclick="carMove(1)" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.55);border:none;color:#fff;width:30px;height:30px;border-radius:50%;font-size:16px;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:10">›</button>
+        <!-- upload btn overlay -->
+        <button onclick="document.getElementById('media-input').click()" style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.2);color:#fff;padding:5px 10px;border-radius:20px;font-size:12px;cursor:pointer;font-family:Tajawal,sans-serif;z-index:10" id="t-add-media-btn">📷 إضافة</button>
+        <button id="media-rm" onclick="removeLastMedia()" style="position:absolute;top:8px;left:8px;background:rgba(224,93,93,.8);border:none;color:#fff;padding:5px 10px;border-radius:20px;font-size:12px;cursor:pointer;font-family:Tajawal,sans-serif;z-index:10;display:none">× حذف</button>
       </div>
       <input type="file" style="display:none" id="media-input" accept="image/*,video/*" onchange="handleMedia(event)">
       <div class="muscles-row" id="modal-muscles"></div>
@@ -410,10 +463,9 @@ h1,h2,h3,.num{font-family:'Barlow Condensed',sans-serif}
       <div class="log-section">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
           <h4 style="font-family:'Barlow Condensed',sans-serif;font-size:18px;color:var(--green);letter-spacing:.5px" id="t-log-ex">✅ تسجيل التمرين</h4>
-          <div class="unit-toggle" onclick="toggleWU()">
-            <span class="ut-opt active" id="ut-kg">KG</span>
+          <div class="unit-toggle" id="unit-toggle" onclick="toggleWU()">
+            <span class="ut-opt" id="ut-kg">KG</span>
             <span class="ut-opt" id="ut-lb">LB</span>
-            <div class="ut-slider" id="ut-slider" style="width:calc(50% - 3px)"></div>
           </div>
         </div>
         <div class="log-form">
@@ -458,7 +510,7 @@ ar:{dir:'rtl',lang:'ar',
  'atab-login':'تسجيل الدخول','atab-reg':'إنشاء حساب',
  'l-user':'اسم المستخدم','l-pass':'كلمة المرور',
  'l-fname':'الاسم الكامل','l-user2':'اسم المستخدم','l-pass2':'كلمة المرور',
- 'btn-login':'دخول','btn-reg':'إنشاء الحساب','btn-logout':'خروج','lang-btn':'🇩🇪 DE','auth-lang-btn':'🇩🇪 DE',
+ 'btn-login':'دخول','btn-reg':'إنشاء الحساب','btn-logout':'خروج','lang-btn':'🇩🇪 DE','auth-lang-btn':'🇩🇪 DE','l-sq':'سؤال الأمان','l-sa':'الإجابة','btn-forgot':'نسيت كلمة المرور؟','fp-title':'استعادة كلمة المرور','fp-sub':'أدخل اسم المستخدم الخاص بك','l-fp-user':'اسم المستخدم','l-fp-q':'السؤال','l-fp-ans':'الإجابة','l-fp-np':'كلمة المرور الجديدة','l-fp-cp':'تأكيد كلمة المرور','fp-back-btn':'← رجوع',
  't-prog-title':'البرنامج','t-prog-desc':'6 أيام تدريب | Push / Pull / Legs × 2 | هدف: بناء الكتلة العضلية',
  't-log-title':'سجل التمارين','t-log-desc':'تتبع كل جلسة تدريبية',
  't-total-s':'جلسة إجمالية','t-week-s':'هذا الأسبوع','t-exs-s':'تمرين مسجل',
@@ -506,7 +558,7 @@ de:{dir:'ltr',lang:'de',
  'atab-login':'Anmelden','atab-reg':'Konto erstellen',
  'l-user':'Benutzername','l-pass':'Passwort',
  'l-fname':'Vollständiger Name','l-user2':'Benutzername','l-pass2':'Passwort',
- 'btn-login':'Einloggen','btn-reg':'Konto erstellen','btn-logout':'Abmelden','lang-btn':'🇸🇦 AR','auth-lang-btn':'🇸🇦 AR',
+ 'btn-login':'Einloggen','btn-reg':'Konto erstellen','btn-logout':'Abmelden','lang-btn':'🇸🇦 AR','auth-lang-btn':'🇸🇦 AR','l-sq':'Sicherheitsfrage','l-sa':'Antwort','btn-forgot':'Passwort vergessen?','fp-title':'Passwort zurücksetzen','fp-sub':'Benutzername eingeben','l-fp-user':'Benutzername','l-fp-q':'Frage','l-fp-ans':'Antwort','l-fp-np':'Neues Passwort','l-fp-cp':'Passwort bestätigen','fp-back-btn':'← Zurück',
  't-prog-title':'Programm','t-prog-desc':'6 Trainingstage | Push / Pull / Legs × 2 | Ziel: Muskelaufbau',
  't-log-title':'Trainingsprotokoll','t-log-desc':'Verfolge jede Trainingseinheit',
  't-total-s':'Einheiten gesamt','t-week-s':'Diese Woche','t-exs-s':'Übungen gesamt',
@@ -554,7 +606,7 @@ let lang='de';
 function T(k){return TR[lang][k]||TR.ar[k]||k;}
 
 const TR_IDS=['auth-sub','atab-login','atab-reg','l-user','l-pass','l-fname','l-user2','l-pass2',
- 'btn-login','btn-reg','btn-logout','lang-btn','auth-lang-btn','t-prog-title','t-prog-desc','t-log-title','t-log-desc',
+ 'btn-login','btn-reg','btn-logout','lang-btn','auth-lang-btn','l-sq','l-sa','btn-forgot','fp-title','fp-sub','l-fp-user','l-fp-q','l-fp-ans','l-fp-np','l-fp-cp','fp-back-btn','t-prog-title','t-prog-desc','t-log-title','t-log-desc',
  't-total-s','t-week-s','t-exs-s','t-nut-title','t-nut-desc','t-prot-today','t-cals-today',
  't-grams','t-grams2','t-goal','t-goal2','t-add-meal','t-meal-name','t-prot-g','t-carb-g','t-fat-g',
  't-cals-g','btn-add-meal','t-today-meals','t-met-title','t-met-desc','t-add-met',
@@ -567,6 +619,7 @@ const TR_IDS=['auth-sub','atab-login','atab-reg','l-user','l-pass','l-fname','l-
  't-ps-sess','t-ps-exs','t-ps-days','exit-title','exit-body','exit-no','exit-yes'];
 
 function applyLang(){
+ populateSQSelect();
  const root=document.getElementById('html-root');
  root.setAttribute('lang',TR[lang].lang);
  root.setAttribute('dir',TR[lang].dir);
@@ -585,148 +638,148 @@ function toggleLang(){
 // ══════════ PROGRAM DATA ══════════
 const PROG=[
 {day:1,type:'push',ar:'الدفع (Push)',de:'Drücken (Push)',mar:'الصدر، الأكتاف، الترايسبس',mde:'Brust, Schultern, Trizeps',exercises:[
- {id:'bp',ar:'ضغط صدر بالبار',de:'Langhantel Bankdrücken',en:'Barbell Bench Press',sets:3,reps:'8-12',icon:'🏋️',
+ {id:'bp',pose:'bench_h',ar:'ضغط صدر بالبار',de:'Langhantel Bankdrücken',en:'Barbell Bench Press',sets:3,reps:'8-12',icon:'🏋️',
   mus_ar:['الصدر','الترايسبس','الأكتاف الأمامية'],mus_de:['Brust','Trizeps','vordere Schulter'],
   steps_ar:['استلق على مقعد مستوٍ وأمسك البار بعرض أوسع من الكتفين','نزّل البار ببطء إلى منتصف الصدر مع بقاء مرفقيك بزاوية 45°','ادفع البار للأعلى حتى يمتد ذراعاك تماماً','ابقِ قدميك مسطحتين على الأرض وظهرك الأسفل مقوساً قليلاً'],
   steps_de:['Flach auf der Bank liegen, Griff breiter als Schultern','Stange langsam zur Brust senken, Ellbogen 45°','Nach oben drücken bis Arme gestreckt','Füße flach, leichte Wölbung im unteren Rücken'],
   tips_ar:'ركّز على الإحساس بالصدر. لا تبعد مرفقيك كثيراً.',tips_de:'Auf Brustgefühl konzentrieren. Ellbogen nicht zu weit.'},
- {id:'inc',ar:'ضغط صدر بالدامبل عالي',de:'Schrägbank Kurzhantel Drücken',en:'Dumbbell Incline Press',sets:3,reps:'8-12',icon:'💪',
+ {id:'inc',pose:'bench_inc',ar:'ضغط صدر بالدامبل عالي',de:'Schrägbank Kurzhantel Drücken',en:'Dumbbell Incline Press',sets:3,reps:'8-12',icon:'💪',
   mus_ar:['الصدر العلوي','الأكتاف الأمامية'],mus_de:['obere Brust','vordere Schulter'],
   steps_ar:['اضبط المقعد على زاوية 30-45°','أمسك الدامبل وادفعهما للأعلى','نزّل ببطء حتى مستوى الصدر','ادفع للأعلى مع إحساس بالصدر العلوي'],
   steps_de:['Bank auf 30-45°','Kurzhanteln nach oben drücken','Langsam auf Brusthöhe senken','Nach oben drücken'],
   tips_ar:'زاوية 30° أفضل للصدر العلوي.',tips_de:'30° besser für die obere Brust.'},
- {id:'cross',ar:'تجميع صدر بالكيبل',de:'Kabelzug Fliegende',en:'Cable Crossover',sets:3,reps:'10-15',icon:'🔀',
+ {id:'cross',pose:'cable_fly',ar:'تجميع صدر بالكيبل',de:'Kabelzug Fliegende',en:'Cable Crossover',sets:3,reps:'10-15',icon:'🔀',
   mus_ar:['الصدر','الخط الوسطي'],mus_de:['Brust','mittlere Linie'],
   steps_ar:['اضبط الكيبلات فوق مستوى الكتف','قف في المنتصف وانحنِ قليلاً','اسحب للأمام والأسفل حتى تتلامس اليدان','عود ببطء'],
   steps_de:['Kabel über Schulterniveau','In der Mitte stehen, leicht beugen','Nach vorne und unten ziehen','Langsam zurück'],
   tips_ar:'لا تقفل المرفق.',tips_de:'Ellbogen leicht gebeugt halten.'},
- {id:'sp',ar:'ضغط كتف بالبار جالس',de:'Schulterdrücken mit Langhantel',en:'Barbell Shoulder Press',sets:3,reps:'8-12',icon:'🔝',
+ {id:'sp',pose:'press_v',ar:'ضغط كتف بالبار جالس',de:'Schulterdrücken mit Langhantel',en:'Barbell Shoulder Press',sets:3,reps:'8-12',icon:'🔝',
   mus_ar:['الكتف','الترايسبس'],mus_de:['Schulter','Trizeps'],
   steps_ar:['اجلس مستقيماً وأمسك البار','ادفع للأعلى فوق الرأس','نزّل ببطء إلى مستوى الذقن'],
   steps_de:['Aufrecht sitzen, Stange greifen','Über Kopf drücken','Langsam bis Kinnhöhe senken'],
   tips_ar:'لا تقوّس الظهر.',tips_de:'Rücken nicht beugen.'},
- {id:'lat',ar:'رفع جانبي بالدامبل',de:'Seitliches Kurzhantel Heben',en:'Lateral Raise',sets:3,reps:'12-15',icon:'🦋',
+ {id:'lat',pose:'lateral_raise',ar:'رفع جانبي بالدامبل',de:'Seitliches Kurzhantel Heben',en:'Lateral Raise',sets:3,reps:'12-15',icon:'🦋',
   mus_ar:['الكتف الجانبي'],mus_de:['seitliche Schulter'],
   steps_ar:['قف مستقيماً وارفع الذراعين للجانب حتى مستوى الكتف','نزّل ببطء'],
   steps_de:['Aufrecht stehen, Arme seitlich bis Schulterniveau heben','Langsam senken'],
   tips_ar:'لا ترفع فوق مستوى الكتف.',tips_de:'Nicht über Schulterniveau.'},
- {id:'skull',ar:'دفع بار ترايسبس مستوي',de:'Skull Crushers',en:'Skull Crushers',sets:3,reps:'8-12',icon:'💀',
+ {id:'skull',pose:'skull_crush',ar:'دفع بار ترايسبس مستوي',de:'Skull Crushers',en:'Skull Crushers',sets:3,reps:'8-12',icon:'💀',
   mus_ar:['الترايسبس'],mus_de:['Trizeps'],
   steps_ar:['استلق وأمسك البار فوق الصدر','نزّل نحو الجبهة بثني المرفق','ادفع للأعلى بالترايسبس'],
   steps_de:['Hinlegen, Stange über Brust','Zur Stirn senken','Mit Trizeps nach oben'],
   tips_ar:'ابقِ مرفقيك ثابتين.',tips_de:'Ellbogen fixiert halten.'},
- {id:'tpd',ar:'سحب كيبل عالي ترايسبس',de:'Kabel Trizeps Drücken',en:'Triceps Pushdown',sets:3,reps:'10-15',icon:'⬇️',
+ {id:'tpd',pose:'pushdown',ar:'سحب كيبل عالي ترايسبس',de:'Kabel Trizeps Drücken',en:'Triceps Pushdown',sets:3,reps:'10-15',icon:'⬇️',
   mus_ar:['الترايسبس'],mus_de:['Trizeps'],
   steps_ar:['أمسك المسطرة من الأعلى','اضغط للأسفل حتى يمتد الذراع','ارجع ببطء'],
   steps_de:['Stange von oben greifen','Nach unten drücken bis gestreckt','Langsam zurück'],
   tips_ar:'ابقِ مرفقيك قريبين من الجسم.',tips_de:'Ellbogen nah am Körper.'}
 ]},
 {day:2,type:'pull',ar:'السحب (Pull)',de:'Ziehen (Pull)',mar:'الظهر، البايسبس، الساعد',mde:'Rücken, Bizeps, Unterarm',exercises:[
- {id:'dl',ar:'الرفعة الميتة',de:'Kreuzheben',en:'Deadlift',sets:3,reps:'5-8',icon:'🏆',
+ {id:'dl',pose:'deadlift',ar:'الرفعة الميتة',de:'Kreuzheben',en:'Deadlift',sets:3,reps:'5-8',icon:'🏆',
   mus_ar:['الظهر الكامل','الأرداف','أوتار الركبة'],mus_de:['gesamter Rücken','Gesäß','Hamstrings'],
   steps_ar:['قف أمام البار وأمسكه بعرض الكتف','ابقِ ظهرك مستقيماً','ارفع بدفع القدمين للأرض حتى الوقوف','نزّل بعكس الحركة'],
   steps_de:['Vor der Stange stehen','Rücken gerade halten','Mit Beinen von Boden wegschieben','Kontrolliert absenken'],
   tips_ar:'الأهم: الظهر مستقيم دائماً.',tips_de:'Wichtigste Regel: Rücken gerade.'},
- {id:'lpd',ar:'سحب ظهر أمامي قبضة واسعة',de:'Latzug vorne weiter Griff',en:'Wide Grip Lat Pulldown',sets:3,reps:'8-12',icon:'🔻',
+ {id:'lpd',pose:'pulldown',ar:'سحب ظهر أمامي قبضة واسعة',de:'Latzug vorne weiter Griff',en:'Wide Grip Lat Pulldown',sets:3,reps:'8-12',icon:'🔻',
   mus_ar:['العضلة العريضة','البايسبس'],mus_de:['Latissimus','Bizeps'],
   steps_ar:['أمسك الحديدة بقبضة واسعة','أمِل الجسم 15° للخلف','اسحب نحو الصدر العلوي','ارجع ببطء'],
   steps_de:['Breiten Griff nehmen','Leicht zurücklehnen','Zur oberen Brust ziehen','Langsam zurück'],
   tips_ar:'تخيّل الكوعين نحو الجيبين.',tips_de:'Ellbogen zu den Taschen drücken.'},
- {id:'row',ar:'سحب دامبل يد واحدة',de:'Einarmiges Kurzhantel Rudern',en:'One Arm Dumbbell Row',sets:3,reps:'8-12',icon:'🪚',
+ {id:'row',pose:'db_row',ar:'سحب دامبل يد واحدة',de:'Einarmiges Kurzhantel Rudern',en:'One Arm Dumbbell Row',sets:3,reps:'8-12',icon:'🪚',
   mus_ar:['الظهر السميك','البايسبس'],mus_de:['Rücken','Bizeps'],
   steps_ar:['ضع ركبتك وراحة يدك على المقعد','اسحب الدامبل نحو الخصر','ارفع الكوع للأعلى','نزّل ببطء'],
   steps_de:['Knie und Hand auf Bank abstützen','Kurzhantel zur Hüfte ziehen','Ellbogen nach oben','Langsam senken'],
   tips_ar:'لا تدور الجذع كثيراً.',tips_de:'Rumpf nicht zu stark drehen.'},
- {id:'fp',ar:'سحب كيبل للوجه',de:'Face Pull',en:'Cable Face Pull',sets:3,reps:'12-15',icon:'🎯',
+ {id:'fp',pose:'face_pull',ar:'سحب كيبل للوجه',de:'Face Pull',en:'Cable Face Pull',sets:3,reps:'12-15',icon:'🎯',
   mus_ar:['الكتف الخلفي','الترابيس'],mus_de:['hintere Schulter','Trapez'],
   steps_ar:['اضبط الكيبل على مستوى الوجه','اسحب نحو الوجه مع فتح الذراعين','اضغط الكتف الخلفيتين معاً','ارجع ببطء'],
   steps_de:['Kabel auf Gesichtshöhe','Zum Gesicht ziehen, Arme öffnen','Schulterblätter zusammendrücken','Langsam zurück'],
   tips_ar:'مهم لصحة الكتف.',tips_de:'Wichtig für Schultergesundheit.'},
- {id:'bc',ar:'سحب بار واقف بايسبس',de:'Langhantel Bizepscurl',en:'Barbell Curl',sets:3,reps:'8-12',icon:'💪',
+ {id:'bc',pose:'curl_bar',ar:'سحب بار واقف بايسبس',de:'Langhantel Bizepscurl',en:'Barbell Curl',sets:3,reps:'8-12',icon:'💪',
   mus_ar:['البايسبس','الساعد'],mus_de:['Bizeps','Unterarm'],
   steps_ar:['قف وأمسك البار من الأسفل','اثنِ الذراعين نحو الكتف مع ثبات المرفقين','نزّل ببطء'],
   steps_de:['Untergriff, schulterbreit','Arme zur Schulter beugen, Ellbogen fixiert','Langsam senken'],
   tips_ar:'المرفق هو المحور.',tips_de:'Ellbogen ist der Drehpunkt.'},
- {id:'cc',ar:'تكوير بايسبس تركيز',de:'Konzentrations-Curl',en:'Concentration Curl',sets:3,reps:'10-15',icon:'🎪',
+ {id:'cc',pose:'curl_conc',ar:'تكوير بايسبس تركيز',de:'Konzentrations-Curl',en:'Concentration Curl',sets:3,reps:'10-15',icon:'🎪',
   mus_ar:['البايسبس — القمة'],mus_de:['Bizeps — Spitze'],
   steps_ar:['اجلس وضع المرفق على الفخذ الداخلي','اثنِ الذراع ببطء','نزّل ببطء تاماً'],
   steps_de:['Ellbogen auf Oberschenkel','Arm langsam beugen','Vollständig absenken'],
   tips_ar:'لبناء قمة البايسبس.',tips_de:'Für den Bizepspeak.'},
- {id:'zot',ar:'سحب دامبل زوتمان',de:'Zottman Curl',en:'Zottman Curl',sets:3,reps:'10-15',icon:'🔄',
+ {id:'zot',pose:'curl_hammer',ar:'سحب دامبل زوتمان',de:'Zottman Curl',en:'Zottman Curl',sets:3,reps:'10-15',icon:'🔄',
   mus_ar:['البايسبس','الساعد'],mus_de:['Bizeps','Unterarm'],
   steps_ar:['ابدأ بقبضة من الأسفل واثنِ الذراع للأعلى','في الأعلى قلّب القبضة للأسفل','نزّل ببطء ثم قلّب مجدداً'],
   steps_de:['Untergriff, Arm nach oben beugen','Oben Griff umdrehen','Langsam senken, dann wieder umdrehen'],
   tips_ar:'يقوي البايسبس والساعد معاً.',tips_de:'Trainiert Bizeps und Unterarm.'}
 ]},
 {day:3,type:'legs',ar:'الأرجل (Legs)',de:'Beine (Legs)',mar:'الأرجل، السمانة، البطن',mde:'Beine, Waden, Bauch',exercises:[
- {id:'sq',ar:'قرفصاء بالبار',de:'Langhantel Kniebeuge',en:'Barbell Squat',sets:3,reps:'8-12',icon:'👑',
+ {id:'sq',pose:'squat',ar:'قرفصاء بالبار',de:'Langhantel Kniebeuge',en:'Barbell Squat',sets:3,reps:'8-12',icon:'👑',
   mus_ar:['الرباعية','الأرداف','أوتار الركبة'],mus_de:['Quadrizeps','Gesäß','Hamstrings'],
   steps_ar:['ضع البار على كتفيك خلف الرقبة','قدماك بعرض الكتفين وأصابع للخارج','انزل حتى الفخذ موازٍ للأرض','ارفع بدفع الكعبين للأرض'],
   steps_de:['Stange auf Schultern','Füße schulterbreit, Zehen nach außen','Bis Oberschenkel parallel absenken','Mit Fersen nach oben drücken'],
   tips_ar:'ملك التمارين!',tips_de:'König der Übungen!'},
- {id:'lp',ar:'ضغط رجل مكبس',de:'Beinpresse',en:'Leg Press',sets:3,reps:'10-15',icon:'🦵',
+ {id:'lp',pose:'leg_press',ar:'ضغط رجل مكبس',de:'Beinpresse',en:'Leg Press',sets:3,reps:'10-15',icon:'🦵',
   mus_ar:['الرباعية','الأرداف'],mus_de:['Quadrizeps','Gesäß'],
   steps_ar:['ضع قدميك بعرض الكتفين على اللوح','انزل حتى 90°','ادفع اللوح بدون قفل الركبة'],
   steps_de:['Füße schulterbreit auf Plattform','Bis 90° senken','Drücken ohne Knie durchstrecken'],
   tips_ar:'قدم أعلى = أرداف أكثر.',tips_de:'Füße höher = mehr Gesäß.'},
- {id:'llc',ar:'آلة ضغط رجل خلفي',de:'Liegender Beinbeuger',en:'Lying Leg Curls',sets:3,reps:'8-12',icon:'🔁',
+ {id:'llc',pose:'leg_curl',ar:'آلة ضغط رجل خلفي',de:'Liegender Beinbeuger',en:'Lying Leg Curls',sets:3,reps:'8-12',icon:'🔁',
   mus_ar:['أوتار الركبة'],mus_de:['Hamstrings'],
   steps_ar:['استلق وضع الجهاز خلف الكعب','اثنِ الركبتين نحو الأرداف','نزّل ببطء'],
   steps_de:['Polster hinter Knöcheln','Knie zum Gesäß beugen','Langsam senken'],
   tips_ar:'نزول بطيء هو المفتاح.',tips_de:'Langsame Absenkphase ist key.'},
- {id:'le',ar:'آلة رفع رجل أمامي',de:'Beinstrecker',en:'Leg Extensions',sets:3,reps:'10-15',icon:'⚡',
+ {id:'le',pose:'leg_ext',ar:'آلة رفع رجل أمامي',de:'Beinstrecker',en:'Leg Extensions',sets:3,reps:'10-15',icon:'⚡',
   mus_ar:['الرباعية'],mus_de:['Quadrizeps'],
   steps_ar:['اجلس وضع الجهاز على الكاحل','ارفع القدمين تماماً','نزّل ببطء'],
   steps_de:['Polster auf Fußspann','Beine strecken','Langsam senken'],
   tips_ar:'لا تفرط بالوزن لحماية الركبة.',tips_de:'Kein zu hohes Gewicht.'},
- {id:'lunge',ar:'طعن بالبار',de:'Langhantel Ausfallschritt',en:'Barbell Lunge',sets:3,reps:'10-12',icon:'🚶',
+ {id:'lunge',pose:'lunge',ar:'طعن بالبار',de:'Langhantel Ausfallschritt',en:'Barbell Lunge',sets:3,reps:'10-12',icon:'🚶',
   mus_ar:['الرباعية','الأرداف'],mus_de:['Quadrizeps','Gesäß'],
   steps_ar:['ضع البار على كتفيك','خطوة كبيرة للأمام','انزل حتى تقترب الركبة الخلفية من الأرض','كرر مع الرجل الأخرى'],
   steps_de:['Stange auf Schultern','Großen Schritt nach vorne','Bis hinteres Knie fast den Boden berührt','Andere Seite'],
   tips_ar:'الركبة الأمامية لا تتجاوز الأصابع.',tips_de:'Knie nicht über Zehen.'},
- {id:'scr',ar:'ضغط سمانة واقف',de:'Stehende Wadenhebeübung',en:'Standing Calf Raise',sets:3,reps:'15-20',icon:'🦶',
+ {id:'scr',pose:'calf_raise',ar:'ضغط سمانة واقف',de:'Stehende Wadenhebeübung',en:'Standing Calf Raise',sets:3,reps:'15-20',icon:'🦶',
   mus_ar:['عضلة الساق'],mus_de:['Wadenmuskel'],
   steps_ar:['قف على حافة منصة','ارفع كعبيك للأعلى','اضغط لثانية','نزّل ببطء'],
   steps_de:['Auf Plattformkante stehen','Fersen so hoch heben','Eine Sekunde halten','Langsam senken'],
   tips_ar:'النطاق الكامل مهم.',tips_de:'Volle Bewegungsamplitude.'},
- {id:'crunch',ar:'كرانش للبطن',de:'Bauchcrunch',en:'Crunches',sets:3,reps:'20-30',icon:'🔥',
+ {id:'crunch',pose:'crunch',ar:'كرانش للبطن',de:'Bauchcrunch',en:'Crunches',sets:3,reps:'20-30',icon:'🔥',
   mus_ar:['عضلات البطن'],mus_de:['Bauchmuskeln'],
   steps_ar:['استلق واثنِ ركبتيك','ارفع كتفيك بضغط البطن','نزّل ببطء'],
   steps_de:['Auf dem Rücken, Knie anwinkeln','Schultern durch Bauchmuskeln heben','Langsam senken'],
   tips_ar:'حركة قصيرة ومركّزة.',tips_de:'Kurze, konzentrierte Bewegung.'},
- {id:'hkr',ar:'رفع الركبتين معلقاً',de:'Hängendes Knieheben',en:'Hanging Knee Raise',sets:3,reps:'15-20',icon:'🏗️',
+ {id:'hkr',pose:'hanging_raise',ar:'رفع الركبتين معلقاً',de:'Hängendes Knieheben',en:'Hanging Knee Raise',sets:3,reps:'15-20',icon:'🏗️',
   mus_ar:['البطن السفلي'],mus_de:['untere Bauchmuskeln'],
   steps_ar:['تعلق بعارضة','ارفع ركبتيك نحو الصدر ببطء','لا تتأرجح','نزّل ببطء'],
   steps_de:['An der Stange hängen','Knie langsam zur Brust','Schwung vermeiden','Langsam senken'],
   tips_ar:'للتقدم: ارفع الساقين مستقيمتين.',tips_de:'Fortgeschritten: Beine gestreckt.'}
 ]},
 {day:4,type:'push',ar:'الدفع (Push) — تكرار',de:'Drücken (Push) — Wiederholung',mar:'الصدر، الأكتاف، الترايسبس',mde:'Brust, Schultern, Trizeps',exercises:[
- {id:'dbp',ar:'ضغط صدر بالدامبل مستوي',de:'Flachbank Kurzhantel Drücken',en:'Dumbbell Bench Press',sets:3,reps:'8-12',icon:'💪',mus_ar:['الصدر','الترايسبس'],mus_de:['Brust','Trizeps'],steps_ar:['استلق وأمسك دامبل فوق الصدر','نزّل للجانبين حتى مستوى الصدر','ادفع للأعلى'],steps_de:['Hinlegen, Kurzhanteln über Brust','Seitlich bis Brustniveau senken','Nach oben drücken'],tips_ar:'نطاق حركة أوسع من البار.',tips_de:'Größerer Bewegungsbereich.'},
- {id:'ibp',ar:'ضغط صدر بالبار عالي',de:'Schrägbank Langhantel Drücken',en:'Incline Barbell Press',sets:3,reps:'8-12',icon:'⬆️',mus_ar:['الصدر العلوي'],mus_de:['obere Brust'],steps_ar:['اضبط المقعد 30-45°','نزّل إلى الصدر العلوي','ادفع للأعلى'],steps_de:['Bank 30-45°','Zur oberen Brust senken','Nach oben drücken'],tips_ar:'للصدر العلوي.',tips_de:'Für die obere Brust.'},
- {id:'dips',ar:'متوازي صدر',de:'Dips',en:'Chest Dips',sets:3,reps:'8-12',icon:'🤸',mus_ar:['الصدر','الترايسبس'],mus_de:['Brust','Trizeps'],steps_ar:['أمسك العارضتين وامِل قليلاً للأمام','انزل حتى مستوى الكوع','ادفع للأعلى'],steps_de:['Griffe halten, leicht nach vorne','Bis Ellbogenniveau senken','Nach oben drücken'],tips_ar:'الميل للأمام يركّز على الصدر.',tips_de:'Vorwärtslehnen für Brust.'},
- {id:'dsp',ar:'ضغط كتف بالدامبل جالس',de:'Sitzende Kurzhantel Schulterdrücken',en:'Dumbbell Shoulder Press',sets:3,reps:'8-12',icon:'🙌',mus_ar:['الكتف','الترايسبس'],mus_de:['Schulter','Trizeps'],steps_ar:['اجلس والدامبل بمستوى الأذن','ادفع للأعلى حتى يمتد الذراع','نزّل ببطء'],steps_de:['Sitzen, Kurzhanteln auf Ohrhöhe','Nach oben drücken','Langsam senken'],tips_ar:'مدى حركة أوسع من البار.',tips_de:'Größerer Bewegungsbereich.'},
- {id:'fr',ar:'رفع أمامي بالدامبل',de:'Vorderes Kurzhantel Heben',en:'Front Raise',sets:3,reps:'12-15',icon:'⬆️',mus_ar:['الكتف الأمامي'],mus_de:['vordere Schulter'],steps_ar:['ارفع ذراعاً للأمام حتى مستوى الكتف','نزّل ببطء وكرر'],steps_de:['Einen Arm bis Schulterniveau heben','Langsam senken, wiederholen'],tips_ar:'وزن خفيف كافٍ.',tips_de:'Leichtes Gewicht reicht.'},
- {id:'cgbp',ar:'ضغط بار ضيق',de:'Enges Bankdrücken',en:'Close Grip Bench Press',sets:3,reps:'8-12',icon:'🔧',mus_ar:['الترايسبس','الصدر الداخلي'],mus_de:['Trizeps','innere Brust'],steps_ar:['أمسك البار بعرض الكتف','نزّل مع إبقاء المرفق قريباً','ادفع للأعلى'],steps_de:['Schulterbreiter Griff','Ellbogen nah am Körper','Nach oben drücken'],tips_ar:'المرفقان قريبان من الجسم.',tips_de:'Ellbogen nah halten.'},
- {id:'ote',ar:'أوفر هيد ترايسبس',de:'Überkopf Trizeps Extension',en:'Overhead Triceps Extension',sets:3,reps:'10-15',icon:'🎯',mus_ar:['الترايسبس — الرأس الطويل'],mus_de:['Trizeps — langer Kopf'],steps_ar:['اجلس وأمسك دامبل بكلتا اليدين','ارفع خلف الرأس','امتد للأعلى','نزّل ببطء'],steps_de:['Sitzen, Kurzhantel mit beiden Händen','Hinter Kopf senken','Nach oben strecken','Langsam senken'],tips_ar:'الرأس الطويل ينشط أكثر هنا.',tips_de:'Langer Kopf wird mehr aktiviert.'}
+ {id:'dbp',pose:'bench_h',ar:'ضغط صدر بالدامبل مستوي',de:'Flachbank Kurzhantel Drücken',en:'Dumbbell Bench Press',sets:3,reps:'8-12',icon:'💪',mus_ar:['الصدر','الترايسبس'],mus_de:['Brust','Trizeps'],steps_ar:['استلق وأمسك دامبل فوق الصدر','نزّل للجانبين حتى مستوى الصدر','ادفع للأعلى'],steps_de:['Hinlegen, Kurzhanteln über Brust','Seitlich bis Brustniveau senken','Nach oben drücken'],tips_ar:'نطاق حركة أوسع من البار.',tips_de:'Größerer Bewegungsbereich.'},
+ {id:'ibp',pose:'bench_inc',ar:'ضغط صدر بالبار عالي',de:'Schrägbank Langhantel Drücken',en:'Incline Barbell Press',sets:3,reps:'8-12',icon:'⬆️',mus_ar:['الصدر العلوي'],mus_de:['obere Brust'],steps_ar:['اضبط المقعد 30-45°','نزّل إلى الصدر العلوي','ادفع للأعلى'],steps_de:['Bank 30-45°','Zur oberen Brust senken','Nach oben drücken'],tips_ar:'للصدر العلوي.',tips_de:'Für die obere Brust.'},
+ {id:'dips',pose:'dips',ar:'متوازي صدر',de:'Dips',en:'Chest Dips',sets:3,reps:'8-12',icon:'🤸',mus_ar:['الصدر','الترايسبس'],mus_de:['Brust','Trizeps'],steps_ar:['أمسك العارضتين وامِل قليلاً للأمام','انزل حتى مستوى الكوع','ادفع للأعلى'],steps_de:['Griffe halten, leicht nach vorne','Bis Ellbogenniveau senken','Nach oben drücken'],tips_ar:'الميل للأمام يركّز على الصدر.',tips_de:'Vorwärtslehnen für Brust.'},
+ {id:'dsp',pose:'press_v',ar:'ضغط كتف بالدامبل جالس',de:'Sitzende Kurzhantel Schulterdrücken',en:'Dumbbell Shoulder Press',sets:3,reps:'8-12',icon:'🙌',mus_ar:['الكتف','الترايسبس'],mus_de:['Schulter','Trizeps'],steps_ar:['اجلس والدامبل بمستوى الأذن','ادفع للأعلى حتى يمتد الذراع','نزّل ببطء'],steps_de:['Sitzen, Kurzhanteln auf Ohrhöhe','Nach oben drücken','Langsam senken'],tips_ar:'مدى حركة أوسع من البار.',tips_de:'Größerer Bewegungsbereich.'},
+ {id:'fr',pose:'front_raise',ar:'رفع أمامي بالدامبل',de:'Vorderes Kurzhantel Heben',en:'Front Raise',sets:3,reps:'12-15',icon:'⬆️',mus_ar:['الكتف الأمامي'],mus_de:['vordere Schulter'],steps_ar:['ارفع ذراعاً للأمام حتى مستوى الكتف','نزّل ببطء وكرر'],steps_de:['Einen Arm bis Schulterniveau heben','Langsam senken, wiederholen'],tips_ar:'وزن خفيف كافٍ.',tips_de:'Leichtes Gewicht reicht.'},
+ {id:'cgbp',pose:'bench_narrow',ar:'ضغط بار ضيق',de:'Enges Bankdrücken',en:'Close Grip Bench Press',sets:3,reps:'8-12',icon:'🔧',mus_ar:['الترايسبس','الصدر الداخلي'],mus_de:['Trizeps','innere Brust'],steps_ar:['أمسك البار بعرض الكتف','نزّل مع إبقاء المرفق قريباً','ادفع للأعلى'],steps_de:['Schulterbreiter Griff','Ellbogen nah am Körper','Nach oben drücken'],tips_ar:'المرفقان قريبان من الجسم.',tips_de:'Ellbogen nah halten.'},
+ {id:'ote',pose:'tricep_oh',ar:'أوفر هيد ترايسبس',de:'Überkopf Trizeps Extension',en:'Overhead Triceps Extension',sets:3,reps:'10-15',icon:'🎯',mus_ar:['الترايسبس — الرأس الطويل'],mus_de:['Trizeps — langer Kopf'],steps_ar:['اجلس وأمسك دامبل بكلتا اليدين','ارفع خلف الرأس','امتد للأعلى','نزّل ببطء'],steps_de:['Sitzen, Kurzhantel mit beiden Händen','Hinter Kopf senken','Nach oben strecken','Langsam senken'],tips_ar:'الرأس الطويل ينشط أكثر هنا.',tips_de:'Langer Kopf wird mehr aktiviert.'}
 ]},
 {day:5,type:'pull',ar:'السحب (Pull) — تكرار',de:'Ziehen (Pull) — Wiederholung',mar:'الظهر، البايسبس — تمارين مختلفة',mde:'Rücken, Bizeps — andere Übungen',exercises:[
- {id:'pu',ar:'عقلة قبضة واسعة',de:'Klimmzüge weiter Griff',en:'Pull Ups',sets:3,reps:'8-12',icon:'🏅',mus_ar:['العضلة العريضة','البايسبس'],mus_de:['Latissimus','Bizeps'],steps_ar:['أمسك العارضة بقبضة واسعة','اسحب حتى تصل الذقن فوق العارضة','نزّل ببطء'],steps_de:['Weiter Griff','Hochziehen bis Kinn über Stange','Langsam senken'],tips_ar:'أفضل تمرين للظهر العريض.',tips_de:'Beste Übung für breiten Rücken.'},
- {id:'tbr',ar:'تمرين التي-بار روينج',de:'T-Bar Rudern',en:'T-Bar Row',sets:3,reps:'8-12',icon:'⚓',mus_ar:['الظهر السميك','البايسبس'],mus_de:['dicker Rücken','Bizeps'],steps_ar:['انحنِ 45° وأمسك المقبض','اسحب نحو الصدر السفلي','نزّل ببطء'],steps_de:['45° beugen, Griff nehmen','Zur unteren Brust ziehen','Langsam senken'],tips_ar:'ممتاز للظهر السميك.',tips_de:'Hervorragend für dicken Rücken.'},
- {id:'cpo',ar:'سحب كيبل بولوفر',de:'Kabel Pullover',en:'Cable Pullover',sets:3,reps:'10-15',icon:'🌊',mus_ar:['العضلة العريضة'],mus_de:['Latissimus'],steps_ar:['اضبط كيبل علوي','اسحب للأسفل نحو الفخذين بحركة قوسية','ارجع ببطء'],steps_de:['Oberes Kabel','In Bogenbewegung zu Oberschenkeln','Langsam zurück'],tips_ar:'يعزل العضلة العريضة.',tips_de:'Isoliert den Latissimus.'},
- {id:'shrug',ar:'رفع كتف بالدامبل',de:'Kurzhantel Schulterzucken',en:'Dumbbell Shrugs',sets:3,reps:'12-15',icon:'🤷',mus_ar:['الترابيس'],mus_de:['Trapez'],steps_ar:['ارفع الكتفين نحو الأذنين','اضغط لثانية','نزّل ببطء'],steps_de:['Schultern zu den Ohren','Eine Sekunde halten','Langsam senken'],tips_ar:'حركة عمودية فقط.',tips_de:'Nur vertikale Bewegung.'},
- {id:'dbc',ar:'تكوير دامبل واقف',de:'Stehender Kurzhantel Curl',en:'Dumbbell Bicep Curl',sets:3,reps:'8-12',icon:'💪',mus_ar:['البايسبس'],mus_de:['Bizeps'],steps_ar:['اثنِ ذراعاً مع تدوير القبضة للخارج','نزّل ببطء وكرر'],steps_de:['Arm beugen, Handgelenk oben drehen','Langsam senken, wiederholen'],tips_ar:'تذكر تدوير المعصم.',tips_de:'Handgelenk oben drehen.'},
- {id:'hpc',ar:'تبادل دامبل مطرقة',de:'Hammer Curl',en:'Hammer Curl',sets:3,reps:'10-15',icon:'🔨',mus_ar:['البايسبس','الساعد'],mus_de:['Bizeps','Unterarm'],steps_ar:['أمسك الدامبل بقبضة مطرقة','اثنِ الذراع ببطء','نزّل ببطء'],steps_de:['Hammergriff','Arm langsam beugen','Langsam senken'],tips_ar:'يقوي الساعد.',tips_de:'Stärkt Unterarm.'},
- {id:'fp2',ar:'سحب كيبل للوجه',de:'Face Pull',en:'Face Pull',sets:3,reps:'12-15',icon:'🎯',mus_ar:['الكتف الخلفي'],mus_de:['hintere Schulter'],steps_ar:['نفس تمرين اليوم 2','اسحب نحو الوجه مع فتح الذراعين'],steps_de:['Wie Tag 2','Zum Gesicht ziehen, Arme öffnen'],tips_ar:'مهم لصحة الكتف.',tips_de:'Wichtig für Schultergesundheit.'}
+ {id:'pu',pose:'pullup',ar:'عقلة قبضة واسعة',de:'Klimmzüge weiter Griff',en:'Pull Ups',sets:3,reps:'8-12',icon:'🏅',mus_ar:['العضلة العريضة','البايسبس'],mus_de:['Latissimus','Bizeps'],steps_ar:['أمسك العارضة بقبضة واسعة','اسحب حتى تصل الذقن فوق العارضة','نزّل ببطء'],steps_de:['Weiter Griff','Hochziehen bis Kinn über Stange','Langsam senken'],tips_ar:'أفضل تمرين للظهر العريض.',tips_de:'Beste Übung für breiten Rücken.'},
+ {id:'tbr',pose:'tbar_row',ar:'تمرين التي-بار روينج',de:'T-Bar Rudern',en:'T-Bar Row',sets:3,reps:'8-12',icon:'⚓',mus_ar:['الظهر السميك','البايسبس'],mus_de:['dicker Rücken','Bizeps'],steps_ar:['انحنِ 45° وأمسك المقبض','اسحب نحو الصدر السفلي','نزّل ببطء'],steps_de:['45° beugen, Griff nehmen','Zur unteren Brust ziehen','Langsam senken'],tips_ar:'ممتاز للظهر السميك.',tips_de:'Hervorragend für dicken Rücken.'},
+ {id:'cpo',pose:'cable_pullover',ar:'سحب كيبل بولوفر',de:'Kabel Pullover',en:'Cable Pullover',sets:3,reps:'10-15',icon:'🌊',mus_ar:['العضلة العريضة'],mus_de:['Latissimus'],steps_ar:['اضبط كيبل علوي','اسحب للأسفل نحو الفخذين بحركة قوسية','ارجع ببطء'],steps_de:['Oberes Kabel','In Bogenbewegung zu Oberschenkeln','Langsam zurück'],tips_ar:'يعزل العضلة العريضة.',tips_de:'Isoliert den Latissimus.'},
+ {id:'shrug',pose:'shrug',ar:'رفع كتف بالدامبل',de:'Kurzhantel Schulterzucken',en:'Dumbbell Shrugs',sets:3,reps:'12-15',icon:'🤷',mus_ar:['الترابيس'],mus_de:['Trapez'],steps_ar:['ارفع الكتفين نحو الأذنين','اضغط لثانية','نزّل ببطء'],steps_de:['Schultern zu den Ohren','Eine Sekunde halten','Langsam senken'],tips_ar:'حركة عمودية فقط.',tips_de:'Nur vertikale Bewegung.'},
+ {id:'dbc',pose:'curl_db',ar:'تكوير دامبل واقف',de:'Stehender Kurzhantel Curl',en:'Dumbbell Bicep Curl',sets:3,reps:'8-12',icon:'💪',mus_ar:['البايسبس'],mus_de:['Bizeps'],steps_ar:['اثنِ ذراعاً مع تدوير القبضة للخارج','نزّل ببطء وكرر'],steps_de:['Arm beugen, Handgelenk oben drehen','Langsam senken, wiederholen'],tips_ar:'تذكر تدوير المعصم.',tips_de:'Handgelenk oben drehen.'},
+ {id:'hpc',pose:'curl_hammer',ar:'تبادل دامبل مطرقة',de:'Hammer Curl',en:'Hammer Curl',sets:3,reps:'10-15',icon:'🔨',mus_ar:['البايسبس','الساعد'],mus_de:['Bizeps','Unterarm'],steps_ar:['أمسك الدامبل بقبضة مطرقة','اثنِ الذراع ببطء','نزّل ببطء'],steps_de:['Hammergriff','Arm langsam beugen','Langsam senken'],tips_ar:'يقوي الساعد.',tips_de:'Stärkt Unterarm.'},
+ {id:'fp2',pose:'face_pull',ar:'سحب كيبل للوجه',de:'Face Pull',en:'Face Pull',sets:3,reps:'12-15',icon:'🎯',mus_ar:['الكتف الخلفي'],mus_de:['hintere Schulter'],steps_ar:['نفس تمرين اليوم 2','اسحب نحو الوجه مع فتح الذراعين'],steps_de:['Wie Tag 2','Zum Gesicht ziehen, Arme öffnen'],tips_ar:'مهم لصحة الكتف.',tips_de:'Wichtig für Schultergesundheit.'}
 ]},
 {day:6,type:'legs',ar:'الأرجل (Legs) — تكرار',de:'Beine (Legs) — Wiederholung',mar:'الأرجل، السمانة، البطن',mde:'Beine, Waden, Bauch',exercises:[
- {id:'sq2',ar:'قرفصاء بالبار',de:'Langhantel Kniebeuge',en:'Barbell Squat',sets:3,reps:'8-12',icon:'👑',mus_ar:['الرباعية','الأرداف'],mus_de:['Quadrizeps','Gesäß'],steps_ar:['نفس اليوم 3 — ركّز على العمق والتقنية','زِد الوزن إن تمكنت'],steps_de:['Wie Tag 3 — Auf Tiefe konzentrieren','Gewicht steigern wenn möglich'],tips_ar:'اليوم الثاني تكون أكثر دفئاً.',tips_de:'Zweiter Tag — wärmer und stärker.'},
- {id:'lp2',ar:'ضغط رجل مكبس',de:'Beinpresse',en:'Leg Press',sets:3,reps:'10-15',icon:'🦵',mus_ar:['الرباعية'],mus_de:['Quadrizeps'],steps_ar:['نفس اليوم 3 — غيّر وضع القدم'],steps_de:['Wie Tag 3 — Fußposition variieren'],tips_ar:'جرّب وضع قدم مختلف.',tips_de:'Andere Fußposition ausprobieren.'},
- {id:'llc2',ar:'آلة ضغط رجل خلفي',de:'Liegender Beinbeuger',en:'Lying Leg Curls',sets:3,reps:'8-12',icon:'🔁',mus_ar:['أوتار الركبة'],mus_de:['Hamstrings'],steps_ar:['نفس اليوم 3 — ركّز على الإحساس'],steps_de:['Wie Tag 3 — Auf Gefühl konzentrieren'],tips_ar:'نزول بطيء.',tips_de:'Langsame Absenkphase.'},
- {id:'le2',ar:'آلة رفع رجل أمامي',de:'Beinstrecker',en:'Leg Extensions',sets:3,reps:'10-15',icon:'⚡',mus_ar:['الرباعية'],mus_de:['Quadrizeps'],steps_ar:['نفس اليوم 3 — تكرارات أبطأ'],steps_de:['Wie Tag 3 — Langsamere Wdh.'],tips_ar:'تكرارات بطيئة.',tips_de:'Langsame Wdh. für mehr Reiz.'},
- {id:'lunge2',ar:'طعن بالبار',de:'Langhantel Ausfallschritt',en:'Barbell Lunge',sets:3,reps:'10-12',icon:'🚶',mus_ar:['الرباعية','الأرداف'],mus_de:['Quadrizeps','Gesäß'],steps_ar:['نفس اليوم 3 — جرّب الطعن للخلف'],steps_de:['Wie Tag 3 — Rückwärtiger Ausfallschritt'],tips_ar:'الطعن للخلف أكثر أماناً.',tips_de:'Rückwärtiger schont das Knie.'},
- {id:'scr2',ar:'ضغط سمانة جالس',de:'Sitzende Wadenhebeübung',en:'Seated Calf Raise',sets:3,reps:'15-20',icon:'🦶',mus_ar:['عضلة الساق (Soleus)'],mus_de:['Wadenmuskel (Soleus)'],steps_ar:['اجلس وضع البار على الفخذين','ارفع كعبيك للأعلى','نزّل ببطء'],steps_de:['Sitzen, Stange auf Oberschenkeln','Fersen heben','Langsam senken'],tips_ar:'يستهدف الصولياس.',tips_de:'Trainiert den Soleus.'},
- {id:'dcr',ar:'كرانش مقلوب',de:'Decline Crunch',en:'Decline Crunch',sets:3,reps:'15-20',icon:'🔥',mus_ar:['البطن السفلي'],mus_de:['untere Bauchmuskeln'],steps_ar:['استلق على منضدة مائلة','ارفع الكتفين نحو الركبتين','نزّل ببطء'],steps_de:['Auf geneigter Bank','Schultern zu Knien heben','Langsam senken'],tips_ar:'زيادة الميل = صعوبة أكثر.',tips_de:'Mehr Neigung = schwieriger.'},
- {id:'sb',ar:'ضغط دامبل جانبي',de:'Seitliche Kurzhantel Neigung',en:'Side Bend',sets:3,reps:'15-20',icon:'↔️',mus_ar:['عضلات البطن الجانبية'],mus_de:['seitliche Bauchmuskeln'],steps_ar:['انحنِ للجانب ببطء مع الدامبل','ارجع بعضلات البطن الجانبية','كرر جميع التكرارات ثم غيّر الجانب'],steps_de:['Seitlich mit Kurzhantel neigen','Durch seitliche Bauchmuskeln aufrichten','Alle Wdh. einer Seite, dann wechseln'],tips_ar:'حركة جانبية فقط.',tips_de:'Nur seitliche Bewegung.'}
+ {id:'sq2',pose:'squat',ar:'قرفصاء بالبار',de:'Langhantel Kniebeuge',en:'Barbell Squat',sets:3,reps:'8-12',icon:'👑',mus_ar:['الرباعية','الأرداف'],mus_de:['Quadrizeps','Gesäß'],steps_ar:['نفس اليوم 3 — ركّز على العمق والتقنية','زِد الوزن إن تمكنت'],steps_de:['Wie Tag 3 — Auf Tiefe konzentrieren','Gewicht steigern wenn möglich'],tips_ar:'اليوم الثاني تكون أكثر دفئاً.',tips_de:'Zweiter Tag — wärmer und stärker.'},
+ {id:'lp2',pose:'leg_press',ar:'ضغط رجل مكبس',de:'Beinpresse',en:'Leg Press',sets:3,reps:'10-15',icon:'🦵',mus_ar:['الرباعية'],mus_de:['Quadrizeps'],steps_ar:['نفس اليوم 3 — غيّر وضع القدم'],steps_de:['Wie Tag 3 — Fußposition variieren'],tips_ar:'جرّب وضع قدم مختلف.',tips_de:'Andere Fußposition ausprobieren.'},
+ {id:'llc2',pose:'leg_curl',ar:'آلة ضغط رجل خلفي',de:'Liegender Beinbeuger',en:'Lying Leg Curls',sets:3,reps:'8-12',icon:'🔁',mus_ar:['أوتار الركبة'],mus_de:['Hamstrings'],steps_ar:['نفس اليوم 3 — ركّز على الإحساس'],steps_de:['Wie Tag 3 — Auf Gefühl konzentrieren'],tips_ar:'نزول بطيء.',tips_de:'Langsame Absenkphase.'},
+ {id:'le2',pose:'leg_ext',ar:'آلة رفع رجل أمامي',de:'Beinstrecker',en:'Leg Extensions',sets:3,reps:'10-15',icon:'⚡',mus_ar:['الرباعية'],mus_de:['Quadrizeps'],steps_ar:['نفس اليوم 3 — تكرارات أبطأ'],steps_de:['Wie Tag 3 — Langsamere Wdh.'],tips_ar:'تكرارات بطيئة.',tips_de:'Langsame Wdh. für mehr Reiz.'},
+ {id:'lunge2',pose:'lunge',ar:'طعن بالبار',de:'Langhantel Ausfallschritt',en:'Barbell Lunge',sets:3,reps:'10-12',icon:'🚶',mus_ar:['الرباعية','الأرداف'],mus_de:['Quadrizeps','Gesäß'],steps_ar:['نفس اليوم 3 — جرّب الطعن للخلف'],steps_de:['Wie Tag 3 — Rückwärtiger Ausfallschritt'],tips_ar:'الطعن للخلف أكثر أماناً.',tips_de:'Rückwärtiger schont das Knie.'},
+ {id:'scr2',pose:'calf_raise_sit',ar:'ضغط سمانة جالس',de:'Sitzende Wadenhebeübung',en:'Seated Calf Raise',sets:3,reps:'15-20',icon:'🦶',mus_ar:['عضلة الساق (Soleus)'],mus_de:['Wadenmuskel (Soleus)'],steps_ar:['اجلس وضع البار على الفخذين','ارفع كعبيك للأعلى','نزّل ببطء'],steps_de:['Sitzen, Stange auf Oberschenkeln','Fersen heben','Langsam senken'],tips_ar:'يستهدف الصولياس.',tips_de:'Trainiert den Soleus.'},
+ {id:'dcr',pose:'crunch',ar:'كرانش مقلوب',de:'Decline Crunch',en:'Decline Crunch',sets:3,reps:'15-20',icon:'🔥',mus_ar:['البطن السفلي'],mus_de:['untere Bauchmuskeln'],steps_ar:['استلق على منضدة مائلة','ارفع الكتفين نحو الركبتين','نزّل ببطء'],steps_de:['Auf geneigter Bank','Schultern zu Knien heben','Langsam senken'],tips_ar:'زيادة الميل = صعوبة أكثر.',tips_de:'Mehr Neigung = schwieriger.'},
+ {id:'sb',pose:'side_bend',ar:'ضغط دامبل جانبي',de:'Seitliche Kurzhantel Neigung',en:'Side Bend',sets:3,reps:'15-20',icon:'↔️',mus_ar:['عضلات البطن الجانبية'],mus_de:['seitliche Bauchmuskeln'],steps_ar:['انحنِ للجانب ببطء مع الدامبل','ارجع بعضلات البطن الجانبية','كرر جميع التكرارات ثم غيّر الجانب'],steps_de:['Seitlich mit Kurzhantel neigen','Durch seitliche Bauchmuskeln aufrichten','Alle Wdh. einer Seite, dann wechseln'],tips_ar:'حركة جانبية فقط.',tips_de:'Nur seitliche Bewegung.'}
 ]},
 {day:7,type:'rest',ar:'راحة كاملة',de:'Vollständige Erholung',mar:'تعافٍ، نوم جيد، تغذية مناسبة',mde:'Erholung, guter Schlaf, gute Ernährung',exercises:[]}
 ];
@@ -743,6 +796,8 @@ function switchAuth(m){
  document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',i===(m==='login'?0:1)));
  document.getElementById('login-form').style.display=m==='login'?'block':'none';
  document.getElementById('register-form').style.display=m==='register'?'block':'none';
+ document.getElementById('forgot-form').style.display='none';
+ if(m==='register')populateSQSelect();
 }
 function getUsers(){try{return JSON.parse(localStorage.getItem('ft_users'))||{};}catch{return{};}}
 function saveUsers(u){localStorage.setItem('ft_users',JSON.stringify(u));}
@@ -754,15 +809,118 @@ function doLogin(){
  if(!users[u]||users[u].pass!==btoa(p)){document.getElementById('login-error').textContent=lang==='ar'?'بيانات خاطئة':'Falsche Daten';return;}
  currentUser=u;localStorage.setItem('ft_session',u);startApp(users[u].name);
 }
+// Security questions
+const SQ_AR=[
+ 'ما اسم أول مدرسة درست فيها؟',
+ 'ما اسم حيوانك الأليف الأول؟',
+ 'ما اسم أمك قبل الزواج؟',
+ 'ما هي مدينة ميلادك؟',
+ 'ما هو لقبك المفضل في الطفولة؟',
+ 'ما اسم أفضل صديق في طفولتك؟',
+ 'ما هو طعامك المفضل؟',
+ 'ما هو اسم الشارع الذي نشأت فيه؟',
+];
+const SQ_DE=[
+ 'Wie hieß deine erste Schule?',
+ 'Wie hieß dein erstes Haustier?',
+ 'Wie lautet der Mädchenname deiner Mutter?',
+ 'In welcher Stadt bist du geboren?',
+ 'Wie lautete dein Spitzname in der Kindheit?',
+ 'Wie hieß dein bester Freund in der Kindheit?',
+ 'Was ist dein Lieblingsessen?',
+ 'In welcher Straße bist du aufgewachsen?',
+];
+
+function getSQ(){return lang==='de'?SQ_DE:SQ_AR;}
+
+function populateSQSelect(){
+ const sel=document.getElementById('reg-sq');if(!sel)return;
+ sel.innerHTML=getSQ().map((q,i)=>`<option value="${i}">${q}</option>`).join('');
+}
+
 function doRegister(){
  const name=document.getElementById('reg-name').value.trim();
  const u=document.getElementById('reg-user').value.trim();
  const p=document.getElementById('reg-pass').value;
+ const sqIdx=document.getElementById('reg-sq').value;
+ const sa=document.getElementById('reg-sa').value.trim().toLowerCase();
  if(!name||!u||!p){document.getElementById('reg-error').textContent=lang==='ar'?'الرجاء إكمال البيانات':'Bitte alle Felder';return;}
+ if(!sa){document.getElementById('reg-error').textContent=lang==='ar'?'الرجاء إدخال إجابة سؤال الأمان':'Sicherheitsantwort eingeben';return;}
  const users=getUsers();
  if(users[u]){document.getElementById('reg-error').textContent=lang==='ar'?'اسم المستخدم موجود':'Benutzername vergeben';return;}
- users[u]={name,pass:btoa(p)};saveUsers(users);
+ users[u]={name,pass:btoa(p),sqIdx:parseInt(sqIdx),sa:btoa(sa)};saveUsers(users);
  currentUser=u;localStorage.setItem('ft_session',u);startApp(name);
+}
+
+// ── FORGOT PASSWORD ──
+let fpUsername='';
+
+function showForgot(){
+ document.getElementById('login-form').style.display='none';
+ document.getElementById('register-form').style.display='none';
+ document.getElementById('forgot-form').style.display='block';
+ document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active'));
+ // reset steps
+ document.getElementById('fp-step1').style.display='block';
+ document.getElementById('fp-step2').style.display='none';
+ document.getElementById('fp-step3').style.display='none';
+ document.getElementById('fp-user').value='';
+ document.getElementById('fp-error1').textContent='';
+ fpUsername='';
+}
+
+function showLogin(){
+ document.getElementById('forgot-form').style.display='none';
+ switchAuth('login');
+}
+
+function fpStep1(){
+ const u=document.getElementById('fp-user').value.trim();
+ if(!u){document.getElementById('fp-error1').textContent=lang==='ar'?'أدخل اسم المستخدم':'Benutzername eingeben';return;}
+ const users=getUsers();
+ if(!users[u]){document.getElementById('fp-error1').textContent=lang==='ar'?'المستخدم غير موجود':'Benutzer nicht gefunden';return;}
+ if(users[u].sqIdx===undefined){document.getElementById('fp-error1').textContent=lang==='ar'?'لا يوجد سؤال أمان لهذا الحساب — تواصل مع الدعم':'Kein Sicherheitsfrage gesetzt';return;}
+ fpUsername=u;
+ // Show the question
+ const sq=getSQ();
+ // Use sqIdx as stored - try both languages
+ const qIdx=users[u].sqIdx;
+ const q=sq[qIdx]||SQ_AR[qIdx]||'?';
+ document.getElementById('fp-question').textContent=q;
+ document.getElementById('fp-answer').value='';
+ document.getElementById('fp-error2').textContent='';
+ document.getElementById('fp-step1').style.display='none';
+ document.getElementById('fp-step2').style.display='block';
+}
+
+function fpStep2(){
+ const ans=document.getElementById('fp-answer').value.trim().toLowerCase();
+ if(!ans){document.getElementById('fp-error2').textContent=lang==='ar'?'أدخل الإجابة':'Antwort eingeben';return;}
+ const users=getUsers();
+ if(!users[fpUsername]){return;}
+ const stored=users[fpUsername].sa;
+ if(!stored||atob(stored)!==ans){
+  document.getElementById('fp-error2').textContent=lang==='ar'?'إجابة خاطئة، حاول مجدداً':'Falsche Antwort, nochmal versuchen';
+  document.getElementById('fp-answer').value='';
+  return;
+ }
+ document.getElementById('fp-newpass').value='';
+ document.getElementById('fp-confpass').value='';
+ document.getElementById('fp-error3').textContent='';
+ document.getElementById('fp-step2').style.display='none';
+ document.getElementById('fp-step3').style.display='block';
+}
+
+function fpStep3(){
+ const np=document.getElementById('fp-newpass').value;
+ const cp=document.getElementById('fp-confpass').value;
+ if(!np||np.length<4){document.getElementById('fp-error3').textContent=lang==='ar'?'كلمة المرور قصيرة جداً (4 أحرف على الأقل)':'Passwort zu kurz (min. 4 Zeichen)';return;}
+ if(np!==cp){document.getElementById('fp-error3').textContent=lang==='ar'?'كلمتا المرور غير متطابقتين':'Passwörter stimmen nicht überein';return;}
+ const users=getUsers();
+ if(!users[fpUsername])return;
+ users[fpUsername].pass=btoa(np);saveUsers(users);
+ showToast(lang==='ar'?'✓ تم تغيير كلمة المرور! سجّل دخولك':'✓ Passwort geändert! Bitte einloggen',3000);
+ showLogin();
 }
 function doLogout(){
  localStorage.removeItem('ft_session');currentUser=null;
@@ -871,47 +1029,134 @@ function openEx(exId,dayNum){
  document.getElementById('log-sets').value=ex.sets;
  document.getElementById('log-reps').value=ex.reps.toString().replace(/\D.*$/,'');
  document.getElementById('log-weight').value='';
- updateWConv();loadMedia(exId);renderExHist(exId);
+ updateWConv();buildCarousel();renderExHist(exId);
  document.getElementById('exercise-modal').classList.add('open');document.body.style.overflow='hidden';
 }
 function closeModal(e){if(e.target===document.getElementById('exercise-modal'))closeModalBtn();}
 function closeModalBtn(){document.getElementById('exercise-modal').classList.remove('open');document.body.style.overflow='';}
 
 // MEDIA
-function triggerMedia(){if(document.getElementById('media-disp').innerHTML)return;document.getElementById('media-input').click();}
+// triggerMedia replaced by direct onclick
 function handleMedia(e){
  const f=e.target.files[0];if(!f||!curEx)return;
  const r=new FileReader();
  r.onload=(ev)=>{const d={type:f.type,src:ev.target.result};localStorage.setItem('ft_media_'+curEx.id,JSON.stringify(d));showMedia(d);};
  r.readAsDataURL(f);
 }
-function loadMedia(id){
- document.getElementById('media-disp').innerHTML='';document.getElementById('media-disp').style.display='none';
- document.getElementById('media-ph').style.display='block';document.getElementById('media-rm').style.display='none';
- const s=localStorage.getItem('ft_media_'+id);if(s){try{showMedia(JSON.parse(s));}catch{}}
+// loadMedia replaced by buildCarousel
+// showMedia replaced by carousel
+function removeLastMedia(){
+ if(!curEx)return;
+ // Find which media index this is (carIdx - 2 since first 2 are pose+muscle)
+ const mediaIdx=carIdx-2;
+ let arr=[];try{const s=localStorage.getItem('ft_media_'+curEx.id);if(s){const p=JSON.parse(s);arr=Array.isArray(p)?p:[p];}}catch{}
+ if(mediaIdx>=0&&mediaIdx<arr.length){
+  arr.splice(mediaIdx,1);
+  if(arr.length===0)localStorage.removeItem('ft_media_'+curEx.id);
+  else localStorage.setItem('ft_media_'+curEx.id,JSON.stringify(arr));
+  buildCarousel();goToSlide(Math.max(0,carIdx-1),false);
+  showToast(lang==='de'?'✓ Gelöscht':'✓ تم الحذف');
+ }
 }
-function showMedia(d){
- const el=document.getElementById('media-disp');
- el.innerHTML=d.type.startsWith('video/')?`<video controls style="width:100%;max-height:280px;border-radius:12px"><source src="${d.src}"></video>`:`<img src="${d.src}" style="width:100%;max-height:280px;object-fit:cover;border-radius:12px">`;
- el.style.display='block';document.getElementById('media-ph').style.display='none';document.getElementById('media-rm').style.display='block';
+
+
+
+
+// ══════════ CAROUSEL ══════════
+const EX_PHOTOS={"bp": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Bench-Press.gif", "inc": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Incline-Dumbbell-Press.gif", "cross": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Cable-Crossover.gif", "sp": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Shoulder-Press.gif", "lat": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Lateral-Raise.gif", "skull": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Skull-Crusher.gif", "tpd": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Triceps-Pushdown.gif", "dl": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Deadlift.gif", "lpd": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Wide-Grip-Lat-Pulldown.gif", "row": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Bent-Over-Row.gif", "fp": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Face-Pull.gif", "bc": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Curl.gif", "cc": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Concentration-Curls.gif", "zot": "https://fitnessprogramer.com/wp-content/uploads/2021/06/Zottman-Curl.gif", "sq": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Squat.gif", "lp": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Leg-Press.gif", "llc": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Lying-Leg-Curls.gif", "le": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Leg-Extension.gif", "lunge": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Lunge.gif", "scr": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Standing-Calf-Raises.gif", "crunch": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Crunches.gif", "hkr": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Hanging-Knee-Raise.gif", "dbp": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Bench-Press.gif", "ibp": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Incline-Barbell-Bench-Press.gif", "dips": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Chest-Dips.gif", "dsp": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Seated-Dumbbell-Shoulder-Press.gif", "fr": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Front-Raise.gif", "cgbp": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Close-Grip-Bench-Press.gif", "ote": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Seated-Overhead-Dumbbell-Triceps-Extension.gif", "pu": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Pull-up.gif", "tbr": "https://fitnessprogramer.com/wp-content/uploads/2021/02/T-Bar-Row.gif", "cpo": "https://fitnessprogramer.com/wp-content/uploads/2021/04/Cable-Pullover.gif", "shrug": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Shrug.gif", "dbc": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Alternating-Dumbbell-Curl.gif", "hpc": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Hammer-Curl.gif", "fp2": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Face-Pull.gif", "sq2": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Squat.gif", "lp2": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Leg-Press.gif", "llc2": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Lying-Leg-Curls.gif", "le2": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Leg-Extension.gif", "lunge2": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Lunge.gif", "scr2": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Seated-Calf-Raise.gif", "dcr": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Decline-Crunches.gif", "sb": "https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Side-Bend.gif"};
+let carIdx=0;
+let carSlides=[];// array of {type:'pose'|'muscle'|'media', content:html|src, mediaType:str}
+let carTouchX=0;
+
+function buildCarousel(){
+ if(!curEx)return;
+ carSlides=[];
+ // Slide 1: real exercise GIF
+ const photoUrl=EX_PHOTOS[curEx.id];
+ if(photoUrl)carSlides.push({type:'photo',src:photoUrl});
+ // Slides 3+: user uploads
+ const store=localStorage.getItem('ft_media_'+curEx.id);
+ if(store){try{
+  const arr=JSON.parse(store);
+  (Array.isArray(arr)?arr:[arr]).forEach(m=>carSlides.push({type:'media',src:m.src,mtype:m.type}));
+ }catch{}}
+ renderCarousel();
+ carIdx=0;goToSlide(0,false);
 }
-function removeMedia(e){
- e.stopPropagation();if(!curEx)return;
- localStorage.removeItem('ft_media_'+curEx.id);
- document.getElementById('media-disp').innerHTML='';document.getElementById('media-disp').style.display='none';
- document.getElementById('media-ph').style.display='block';document.getElementById('media-rm').style.display='none';
- document.getElementById('media-input').value='';
+
+function renderCarousel(){
+ const track=document.getElementById('carousel-track');
+ const dots=document.getElementById('carousel-dots');
+ if(!track)return;
+ track.innerHTML=carSlides.map((s,i)=>{
+  let inner='';
+  if(s.type==='pose'){
+   inner=s.html;
+  } else if(s.type==='photo'){
+   inner=`<div style="background:#0b0b10;display:flex;align-items:center;justify-content:center;min-height:220px;position:relative">
+    <img src="${s.src}" style="max-width:100%;max-height:280px;object-fit:contain;display:block"
+     onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+    <div style="display:none;flex-direction:column;align-items:center;justify-content:center;padding:30px;color:var(--muted);text-align:center;gap:8px;position:absolute;inset:0">
+     <div style="font-size:36px">🏋️</div>
+     <div style="font-size:12px">${lang==='de'?'Bild nicht verfügbar im Offline-Modus':'الصورة غير متاحة بدون إنترنت'}</div>
+     <div style="font-size:11px;color:#444">${lang==='de'?'Im Browser öffnen um GIFs zu sehen':'افتح في المتصفح لرؤية الصور'}</div>
+    </div>
+   </div>`;
+  } else if(s.mtype&&s.mtype.startsWith('video/')){
+   inner=`<video controls style="width:100%;max-height:260px;display:block"><source src="${s.src}"></video>`;
+  } else {
+   inner=`<img src="${s.src}" style="width:100%;max-height:260px;object-fit:cover;display:block">`;
+  }
+  return `<div class="car-slide">${inner}</div>`;
+ }).join('');
+ dots.innerHTML=carSlides.map((_,i)=>`<button class="car-dot${i===carIdx?' active':''}" onclick="goToSlide(${i},true)"></button>`).join('');
+ // show/hide arrows
+ const prev=document.getElementById('car-prev');const next=document.getElementById('car-next');
+ if(prev&&next){prev.style.display=carSlides.length>1?'flex':'none';next.style.display=carSlides.length>1?'flex':'none';}
+ // show remove btn only if on a media slide
+ updateCarRemoveBtn();
+ // touch events
+ const wrap=document.getElementById('carousel-wrap');
+ if(wrap){
+  wrap.ontouchstart=(e)=>{carTouchX=e.touches[0].clientX;};
+  wrap.ontouchend=(e)=>{
+   const dx=carTouchX-e.changedTouches[0].clientX;
+   if(Math.abs(dx)>40)carMove(dx>0?1:-1);
+  };
+ }
+}
+
+function goToSlide(idx,animate){
+ carIdx=Math.max(0,Math.min(carSlides.length-1,idx));
+ const track=document.getElementById('carousel-track');
+ if(track)track.style.transform=`translateX(-${carIdx*100}%)`;
+ if(!animate&&track)track.style.transition='none';
+ else if(track)track.style.transition='transform .3s ease';
+ document.querySelectorAll('.car-dot').forEach((d,i)=>d.classList.toggle('active',i===carIdx));
+ updateCarRemoveBtn();
+}
+
+function carMove(dir){goToSlide(carIdx+dir,true);}
+
+function updateCarRemoveBtn(){
+ const rm=document.getElementById('media-rm');
+ if(!rm)return;
+ const isMedia=carSlides[carIdx]&&carSlides[carIdx].type==='media';
+ rm.style.display=isMedia?'block':'none';
 }
 
 // WEIGHT UNIT
 function toggleWU(){
  const v=parseFloat(document.getElementById('log-weight').value)||0;
  wUnit=wUnit==='kg'?'lb':'kg';
- const sl=document.getElementById('ut-slider');
- const tg=document.getElementById('unit-toggle')||sl.parentElement;
- const hw=(tg.offsetWidth/2)-3;
- if(wUnit==='kg'){sl.style.right='3px';sl.style.left='auto';sl.style.width=hw+'px';document.getElementById('ut-kg').classList.add('active');document.getElementById('ut-lb').classList.remove('active');document.getElementById('wt-label').textContent=T('wt-kg');if(v)document.getElementById('log-weight').value=Math.round((v/2.2046)*10)/10;}
- else{sl.style.left='3px';sl.style.right='auto';sl.style.width=hw+'px';document.getElementById('ut-lb').classList.add('active');document.getElementById('ut-kg').classList.remove('active');document.getElementById('wt-label').textContent=T('wt-lb');if(v)document.getElementById('log-weight').value=Math.round((v*2.2046)*10)/10;}
+ document.getElementById('ut-kg').classList.toggle('active',wUnit==='kg');
+ document.getElementById('ut-lb').classList.toggle('active',wUnit==='lb');
+ document.getElementById('wt-label').textContent=wUnit==='kg'?T('wt-kg'):T('wt-lb');
+ if(v){
+  document.getElementById('log-weight').value=wUnit==='lb'
+   ?Math.round(v*2.2046*10)/10
+   :Math.round((v/2.2046)*10)/10;
+ }
  updateWConv();
 }
 function updateWConv(){
@@ -1235,6 +1480,7 @@ function initBackHandler(){
 
 // ══════════ INIT ══════════
 window.addEventListener('DOMContentLoaded',()=>{
+ populateSQSelect();
  lang=localStorage.getItem('ft_lang')||'de';
  applyLang();
  initBackHandler();
