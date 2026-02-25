@@ -405,6 +405,19 @@ h1,h2,h3,.num{font-family:'Barlow Condensed',sans-serif}
         <div class="pf-field"><label id="t-new-pass">كلمة المرور الجديدة</label><input type="password" id="new-pass" placeholder="••••••••"></div>
         <button class="btn-spf" onclick="changePassword()" id="btn-chg-pass">تغيير كلمة المرور</button>
       </div>
+      <!-- BACKUP SECTION -->
+      <div class="psec" style="border-color:rgba(79,195,247,.3)">
+        <h3 id="t-backup-title" style="color:var(--accent3)">💾 النسخ الاحتياطي</h3>
+        <p id="t-backup-desc" style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.7">احفظ نسخة من بياناتك كاملة (التمارين، التغذية، القياسات، الإعدادات). يمكنك استعادتها لاحقاً في أي حساب.</p>
+        <button class="btn-spf" onclick="exportBackup()" id="btn-export" style="background:var(--accent3);margin-bottom:10px">📥 تصدير النسخة الاحتياطية</button>
+        <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:4px">
+          <p id="t-import-desc" style="font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.7">لاستعادة بياناتك: سجّل دخول بأي حساب ثم استورد ملف النسخة الاحتياطية.</p>
+          <label style="display:block;width:100%;padding:13px;background:var(--card2);border:2px dashed var(--border);border-radius:10px;text-align:center;cursor:pointer;font-family:Tajawal,sans-serif;font-size:14px;color:var(--muted);transition:.2s" id="lbl-import" onmouseover="this.style.borderColor='var(--accent3)'" onmouseout="this.style.borderColor='var(--border)'">
+            <span id="t-import-btn">📤 اختر ملف النسخة الاحتياطية</span>
+            <input type="file" accept=".json" style="display:none" onchange="importBackup(event)">
+          </label>
+        </div>
+      </div>
     </div>
   </div>
   <!-- NAV -->
@@ -530,7 +543,7 @@ ar:{dir:'rtl',lang:'ar',
  'btn-save-pf':'حفظ المعلومات','t-goals-title':'الأهداف اليومية',
  't-goal-prot':'هدف البروتين (جم)','t-goal-cals':'هدف السعرات (kcal)',
  'btn-save-goals':'حفظ الأهداف','t-chg-pass':'تغيير كلمة المرور',
- 't-curr-pass':'كلمة المرور الحالية','t-new-pass':'كلمة المرور الجديدة','btn-chg-pass':'تغيير كلمة المرور',
+ 't-curr-pass':'كلمة المرور الحالية','t-new-pass':'كلمة المرور الجديدة','btn-chg-pass':'تغيير كلمة المرور','t-backup-title':'💾 النسخ الاحتياطي','t-backup-desc':'احفظ نسخة من بياناتك كاملة (التمارين، التغذية، القياسات، الإعدادات). يمكنك استعادتها لاحقاً في أي حساب.','btn-export':'📥 تصدير النسخة الاحتياطية','t-import-desc':'لاستعادة بياناتك: سجّل دخول بأي حساب ثم استورد ملف النسخة الاحتياطية.','t-import-btn':'📤 اختر ملف النسخة الاحتياطية',
  't-add-media':'اضغط لإضافة صورة أو فيديو توضيحي',
  't-how-to':'⚡ كيفية الأداء','t-tips':'💡 نصائح',
  't-log-ex':'✅ تسجيل التمرين','t-sets':'عدد المجموعات','t-reps':'عدد التكرارات',
@@ -578,7 +591,7 @@ de:{dir:'ltr',lang:'de',
  'btn-save-pf':'Profil speichern','t-goals-title':'Tagesziele',
  't-goal-prot':'Proteinziel (g)','t-goal-cals':'Kalorienziel (kcal)',
  'btn-save-goals':'Ziele speichern','t-chg-pass':'Passwort ändern',
- 't-curr-pass':'Aktuelles Passwort','t-new-pass':'Neues Passwort','btn-chg-pass':'Passwort ändern',
+ 't-curr-pass':'Aktuelles Passwort','t-new-pass':'Neues Passwort','btn-chg-pass':'Passwort ändern','t-backup-title':'💾 Datensicherung','t-backup-desc':'Speichere eine vollständige Sicherung (Training, Ernährung, Maße, Einstellungen). Du kannst sie später in jedem Konto wiederherstellen.','btn-export':'📥 Backup exportieren','t-import-desc':'Zum Wiederherstellen: Mit beliebigem Konto einloggen, dann Backup-Datei importieren.','t-import-btn':'📤 Backup-Datei wählen',
  't-add-media':'Tippen um Bild oder Video hinzuzufügen',
  't-how-to':'⚡ Ausführung','t-tips':'💡 Tipps',
  't-log-ex':'✅ Übung protokollieren','t-sets':'Sätze','t-reps':'Wiederholungen',
@@ -613,7 +626,7 @@ const TR_IDS=['auth-sub','atab-login','atab-reg','l-user','l-pass','l-fname','l-
  't-lbl-wt','t-lbl-chest','t-lbl-arm','t-lbl-waist','t-lbl-thigh','t-lbl-shldr',
  'btn-save-met','t-met-log','t-prof-title','t-prof-desc','t-edit-info','t-pf-name','t-pf-bio','t-pf-age',
  'btn-save-pf','t-goals-title','t-goal-prot','t-goal-cals','btn-save-goals','t-chg-pass',
- 't-curr-pass','t-new-pass','btn-chg-pass','t-add-media','t-how-to','t-tips','t-log-ex',
+ 't-curr-pass','t-new-pass','btn-chg-pass','t-backup-title','t-backup-desc','btn-export','t-import-desc','t-import-btn','t-add-media','t-how-to','t-tips','t-log-ex',
  't-sets','t-reps','t-date','btn-save-log','t-prev-log',
  'nav-prog','nav-log-l','nav-nut','nav-met','nav-prof',
  't-ps-sess','t-ps-exs','t-ps-days','exit-title','exit-body','exit-no','exit-yes'];
@@ -1451,6 +1464,89 @@ function changePassword(){
  users[currentUser].pass=btoa(newP);saveUsers(users);
  document.getElementById('curr-pass').value='';document.getElementById('new-pass').value='';
  showToast(T('toast-pass'));
+}
+
+
+// ══════════ BACKUP & RESTORE ══════════
+function exportBackup(){
+ if(!currentUser)return;
+ const data={
+  version:2,
+  exportedAt:new Date().toISOString(),
+  exportedBy:currentUser,
+  profile:gdO('profile'),
+  goals:gdO('goals'),
+  exlogs:gd('exlogs'),
+  meals:gd('meals'),
+  metrics:gd('metrics'),
+  avatar:localStorage.getItem('ft_av_'+currentUser)||null,
+  lang:localStorage.getItem('ft_lang')||'de',
+ };
+ // Also save media for each exercise
+ const media={};
+ const users=getUsers();
+ const nm=(users[currentUser]&&users[currentUser].name)||currentUser;
+ // collect all exercise IDs from PROG
+ PROG.forEach(d=>d.exercises.forEach(e=>{
+  const m=localStorage.getItem('ft_media_'+e.id);
+  if(m)media[e.id]=m;
+ }));
+ data.media=media;
+
+ const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement('a');
+ const date=new Date().toISOString().split('T')[0];
+ a.href=url;
+ a.download=`fittrack_backup_${currentUser}_${date}.json`;
+ a.click();
+ URL.revokeObjectURL(url);
+ showToast(lang==='ar'?'✓ تم تصدير النسخة الاحتياطية!':'✓ Backup exportiert!',3000);
+}
+
+function importBackup(e){
+ const file=e.target.files[0];
+ if(!file||!currentUser)return;
+ e.target.value='';
+ const reader=new FileReader();
+ reader.onload=(ev)=>{
+  try{
+   const data=JSON.parse(ev.target.result);
+   if(!data.exlogs&&!data.meals&&!data.metrics){
+    showToast(lang==='ar'?'❌ ملف غير صالح':'❌ Ungültige Datei',3000);return;
+   }
+   // Confirm before overwriting
+   const msg=lang==='ar'
+    ?`هل تريد استعادة البيانات؟\n\nسيتم استبدال بياناتك الحالية بـ:\n• ${(data.exlogs||[]).length} تمرين مسجل\n• ${(data.meals||[]).length} وجبة\n• ${(data.metrics||[]).length} قياس\n\nمن حساب: ${data.exportedBy||'—'}\nتاريخ: ${(data.exportedAt||'').split('T')[0]}`
+    :`Daten wiederherstellen?\n\nDeine aktuellen Daten werden ersetzt durch:\n• ${(data.exlogs||[]).length} Übungen\n• ${(data.meals||[]).length} Mahlzeiten\n• ${(data.metrics||[]).length} Messungen\n\nVon Konto: ${data.exportedBy||'—'}\nDatum: ${(data.exportedAt||'').split('T')[0]}`;
+   if(!confirm(msg))return;
+
+   // Restore all data to current user
+   if(data.exlogs)sd('exlogs',data.exlogs);
+   if(data.meals)sd('meals',data.meals);
+   if(data.metrics)sd('metrics',data.metrics);
+   if(data.profile)localStorage.setItem(gk('profile'),JSON.stringify(data.profile));
+   if(data.goals)localStorage.setItem(gk('goals'),JSON.stringify(data.goals));
+   if(data.avatar)localStorage.setItem('ft_av_'+currentUser,data.avatar);
+   if(data.lang)localStorage.setItem('ft_lang',data.lang);
+   // Restore media
+   if(data.media){
+    Object.entries(data.media).forEach(([exId,mData])=>{
+     localStorage.setItem('ft_media_'+exId,mData);
+    });
+   }
+   // Refresh all views
+   lang=data.lang||lang;
+   applyLang();
+   buildProgram();
+   renderProfile();
+   updateAvTopbar();
+   showToast(lang==='ar'?'✓ تم استعادة البيانات بنجاح!':'✓ Daten erfolgreich wiederhergestellt!',3500);
+  }catch(err){
+   showToast(lang==='ar'?'❌ خطأ في قراءة الملف':'❌ Fehler beim Lesen der Datei',3000);
+  }
+ };
+ reader.readAsText(file);
 }
 
 // ══════════ TOAST + EXIT ══════════
